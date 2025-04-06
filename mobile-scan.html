@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MR.KING-AI Login</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: black;
+      color: #00ff00;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .login-screen, .intro-screen, .scan-screen, .result-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+    }
+    .active { display: flex !important; }
+    input[type="password"] {
+      padding: 10px;
+      margin-top: 15px;
+      background: black;
+      border: 1px solid #00ff00;
+      color: #00ff00;
+      width: 100%;
+      font-size: 18px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #00ff00;
+      color: black;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #scan-progress {
+      height: 20px;
+      background: #00ff00;
+      width: 0;
+      margin-top: 20px;
+      transition: width 0.2s;
+    }
+    .terminal-line {
+      text-align: left;
+      width: 100%;
+      white-space: pre-wrap;
+      margin-top: 10px;
+    }
+    .big-title { font-size: 28px; margin-bottom: 10px; }
+    .sub-title { font-size: 14px; margin-bottom: 30px; }
+    .red { color: red; }
+  </style>
+</head>
+<body>
+  <div class="login-screen active" id="loginScreen">
+    <div class="big-title">[ MR.KING-AI ]</div>
+    <div class="sub-title">System Access: Protected</div>
+    <input type="password" id="passwordInput" placeholder="Enter Access Key...">
+    <button onclick="checkPassword()">LOGIN</button>
+  </div>
+
+  <div class="intro-screen" id="introScreen">
+    <div class="big-title">MR.KING-AI</div>
+    <div class="sub-title">MADE BY PARTH</div>
+    <button onclick="startScan()">FULL DEVICE SCAN</button>
+  </div>
+
+  <div class="scan-screen" id="scanScreen">
+    <div class="big-title">Scanning Device...</div>
+    <div id="scanTerminal"></div>
+    <div id="scan-progress"></div>
+  </div>
+
+  <div class="result-screen" id="resultScreen">
+    <div class="big-title red">CHEATING DETECTED</div>
+    <div class="terminal-line">Battery: <span id="batteryInfo"></span></div>
+    <div class="terminal-line">Storage: <span id="storageInfo"></span></div>
+    <div class="terminal-line">Location: <span id="locationInfo"></span></div>
+    <div class="terminal-line">Primary Instagram: Permanently Logged In</div>
+    <div class="terminal-line">Secondary Instagram: Frequent Login/Logout</div>
+    <div class="terminal-line">Suspicious Chat Logs Found</div>
+    <div class="terminal-line red">Trust Score: 13% [CRITICAL]</div>
+  </div>
+
+  <script>
+    const password = 'xrT9#A!17g@2';
+
+    function checkPassword() {
+      const input = document.getElementById('passwordInput').value;
+      if (input === password) {
+        document.getElementById('loginScreen').classList.remove('active');
+        document.getElementById('introScreen').classList.add('active');
+      } else {
+        alert('Access Denied');
+      }
+    }
+
+    function startScan() {
+      document.getElementById('introScreen').classList.remove('active');
+      document.getElementById('scanScreen').classList.add('active');
+
+      let terminal = document.getElementById('scanTerminal');
+      let progress = document.getElementById('scan-progress');
+      let logs = [
+        'Fetching battery health...',
+        'Accessing device storage...',
+        'Requesting location access...',
+        'Requesting microphone permission...',
+        'Requesting camera permission...',
+        'Analyzing WhatsApp media...',
+        'Instagram account activity checking...',
+        'Matching patterns with AI...',
+        'Scanning hidden folders...',
+        'Building final report...'
+      ];
+
+      navigator.getBattery().then(b => {
+        document.getElementById('batteryInfo').innerText = Math.round(b.level * 100) + '%';
+      });
+
+      if (navigator.storage && navigator.storage.estimate) {
+        navigator.storage.estimate().then(({usage, quota}) => {
+          let used = (usage / (1024 * 1024)).toFixed(2);
+          let total = (quota / (1024 * 1024)).toFixed(2);
+          document.getElementById('storageInfo').innerText = `${used} MB / ${total} MB`;
+        });
+      }
+
+      navigator.geolocation.getCurrentPosition(pos => {
+        document.getElementById('locationInfo').innerText =
+          `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
+      }, err => {
+        document.getElementById('locationInfo').innerText = 'Permission denied';
+      });
+
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .catch(err => console.log("Audio permission denied:", err));
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .catch(err => console.log("Video permission denied:", err));
+
+      let i = 0;
+      let scanInterval = setInterval(() => {
+        if (i < logs.length) {
+          let line = document.createElement('div');
+          line.className = 'terminal-line';
+          line.textContent = logs[i];
+          terminal.appendChild(line);
+
+          let progressValue = ((i + 1) / logs.length) * 100;
+          progress.style.width = progressValue + '%';
+
+          i++;
+        } else {
+          clearInterval(scanInterval);
+          setTimeout(() => {
+            document.getElementById('scanScreen').classList.remove('active');
+            document.getElementById('resultScreen').classList.add('active');
+          }, 1000);
+        }
+      }, 1500);
+    }
+  </script>
+</body>
+</html>
